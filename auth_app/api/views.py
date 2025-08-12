@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from .models import UserProfile
+from ..models import UserProfile
 from .serializers import UserRegistrationSerializer, LoginSerializer
 
 class UserProfileCreateView(generics.CreateAPIView):
@@ -51,7 +51,7 @@ class LoginView(generics.GenericAPIView):
         """Return a HTTP 200 OK response with the authentication token and user details."""
         return Response({
             'token': token.key,
-            'username': profile.username,
+            'username': user.username,
             'email': user.email,
             'user_id': user.id
         }, status=status.HTTP_200_OK)

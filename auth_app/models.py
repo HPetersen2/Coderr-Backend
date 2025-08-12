@@ -17,9 +17,7 @@ class UserProfile(models.Model):
         ('customer', 'Customer-User'),
         ('business', 'Business-User'),
     ]
-
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-
     type = models.CharField(max_length=20, choices=UserType_CHOICES)
 
     def __str__(self):

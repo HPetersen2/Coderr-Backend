@@ -2,7 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
-from .models import UserProfile
+from ..models import UserProfile
+from profile_app.models import Profile
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
@@ -67,6 +68,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         user = User.objects.create_user(username=username, email=email, password=password)
         profile = UserProfile.objects.create(user=user, **validated_data)
+        Profile.objects.create(user=user)
 
         token, _ = Token.objects.get_or_create(user=user)
 
