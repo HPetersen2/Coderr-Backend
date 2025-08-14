@@ -2,11 +2,11 @@ from rest_framework import serializers
 from ..models import Profile
 
 class ProfileDetailSerializer(serializers.ModelSerializer):
-    username = serializers.PrimaryKeyRelatedField(source='user.username', read_only=True)
-    first_name = serializers.PrimaryKeyRelatedField(source='user.firstname', read_only=True)
-    last_name = serializers.PrimaryKeyRelatedField(source='user.lastname', read_only=True)
-    type = serializers.PrimaryKeyRelatedField(source='profile.type', read_only=True)
-    email = serializers.PrimaryKeyRelatedField(source='user.email', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name')
+    type = serializers.CharField(source='user.userprofile.type', read_only=True)
+    email = serializers.EmailField(source='user.email')
 
     class Meta:
         model = Profile

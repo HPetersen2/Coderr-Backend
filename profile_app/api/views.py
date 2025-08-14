@@ -2,8 +2,15 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from ..models import Profile
 from .serializers import ProfileDetailSerializer
+from .permissons import IsOwner
 
-class ProfileDetailView(generics.RetrieveAPIView):
+class ProfileDetailView(generics.RetrieveUpdateAPIView):
     queryset = Profile.objects.filter()
     serializer_class = ProfileDetailSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        if self.request.method == 'PATCH':
+            return [IsAuthenticated(), IsOwner()]
+        return super().get_permissions()
