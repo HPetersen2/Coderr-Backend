@@ -14,3 +14,7 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
         if self.request.method == 'PATCH':
             return [IsAuthenticated(), IsOwner()]
         return super().get_permissions()
+    
+class ProfileBusinessList(generics.RetrieveAPIView):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileDetailSerializer
