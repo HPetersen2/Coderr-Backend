@@ -1,5 +1,6 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from django_filters import rest_framework as filters
 from ..models import Profile
 from .serializers import ProfileDetailSerializer
 from .permissons import IsOwner
@@ -15,6 +16,8 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
             return [IsAuthenticated(), IsOwner()]
         return super().get_permissions()
     
-class ProfileBusinessList(generics.RetrieveAPIView):
+class ProfileBusinessList(generics.ListAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileDetailSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('type',)
