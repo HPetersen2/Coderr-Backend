@@ -1,5 +1,11 @@
 from django.db import models
 
+OFFER_CHOICES = [
+    ("basic", "Basic"),
+    ("standard", "Standard"),
+    ("premium", "Premium")
+]
+
 class Offer(models.Model):
     title = models.CharField(max_length=50)
     image = models.FileField(upload_to="media/", blank=True, null=True)
@@ -7,4 +13,8 @@ class Offer(models.Model):
 
 class OfferDetail(models.Model):
     title = models.CharField(max_length=50)
-    revisions = models.IntegerField()
+    revisions = models.PositiveIntegerField()
+    delivery_time_in_days = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    features = models.JSONField(default=list)
+    offer_type = models.CharField(max_length=25, choices=OFFER_CHOICES)
