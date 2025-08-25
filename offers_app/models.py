@@ -12,6 +12,7 @@ class Offer(models.Model):
     description = models.CharField(max_length=255)
 
 class OfferDetail(models.Model):
+    offer = models.ForeignKey(Offer, related_name="detail", on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     revisions = models.PositiveIntegerField()
     delivery_time_in_days = models.PositiveIntegerField()
