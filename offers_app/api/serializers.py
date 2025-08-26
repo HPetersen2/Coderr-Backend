@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from offers_app.models import Offer, OfferDetail
 
+
+class OfferGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Offer
+        fields = ['id', 'title', 'image', 'description', 'created_at', 'updated_at']
+
 class OfferDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfferDetail
@@ -9,7 +15,7 @@ class OfferDetailSerializer(serializers.ModelSerializer):
             "offer": {"read_only": True}
         }
 
-class OfferSerizalizer(serializers.ModelSerializer):
+class OfferPostSerizalizer(serializers.ModelSerializer):
     details = OfferDetailSerializer(many=True)
     class Meta:
         model = Offer
@@ -26,3 +32,4 @@ class OfferSerizalizer(serializers.ModelSerializer):
         for detail in details_data:
             OfferDetail.objects.create(offer=offer, **detail)
         return offer
+    
