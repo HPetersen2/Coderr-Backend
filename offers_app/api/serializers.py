@@ -1,18 +1,27 @@
 from rest_framework import serializers
+from django.urls import reverse
 from offers_app.models import Offer, OfferDetail
 
 
-class OfferGetSerializer(serializers.ModelSerializer):
+class OfferDetailGetSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Offer
-        fields = ['id', 'title', 'image', 'description', 'created_at', 'updated_at']
+        fields = ['id', 'url']
+
+class OfferGetSerializer(serializers.ModelSerializer):
+    details = OfferDetailGetSerializer(many=True)
+    class Meta:
+        model = Offer
+        fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details']
 
 class OfferDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfferDetail
         fields = ['id', 'title', 'revisions', 'delivery_time_in_days', 'price', 'features', 'offer_type']
         extra_kwargs = {
-            "offer": {"read_only": True}
+            "offer": {"read_only": True},
+            "user": {"read_only": True}
         }
 
 class OfferPostSerizalizer(serializers.ModelSerializer):
