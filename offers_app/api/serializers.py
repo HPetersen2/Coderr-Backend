@@ -1,19 +1,33 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from offers_app.models import Offer, OfferDetail
 
 
 class OfferDetailGetSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name='offer-detail',
+        lookup_field='pk'
+    )
     
     class Meta:
         model = Offer
         fields = ['id', 'url']
 
+class OfferUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ['first_name', 'last_name', 'username']
+
+
 class OfferGetSerializer(serializers.ModelSerializer):
     details = OfferDetailGetSerializer(many=True)
+    user_details = OfferUserSerializer(source='user')
+    min_price = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    min_delivery_time = serializers.IntegerField(read_only=True)
     class Meta:
         model = Offer
-        fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details']
+        fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time', 'user_details']
 
 class OfferDetailSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,7 +38,7 @@ class OfferDetailSerializer(serializers.ModelSerializer):
             "user": {"read_only": True}
         }
 
-class OfferPostSerizalizer(serializers.ModelSerializer):
+class OfferPostSerializer(serializers.ModelSerializer):
     details = OfferDetailSerializer(many=True)
     class Meta:
         model = Offer
