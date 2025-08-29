@@ -8,3 +8,7 @@ class IsBusinessUser(BasePermission):
             and user_profile is not None
             and user_profile.type == "business"
         )
+
+class IsOwner(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.user
