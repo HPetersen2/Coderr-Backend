@@ -1,17 +1,25 @@
 from django.db.models import Min
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from .permissons import IsBusinessUser, IsOwner
 from .pagination import OfferPagination
+from .filters import OfferFilter
 from offers_app.models import Offer, OfferDetail
-from offers_app.api.serializers import OfferGetSerializer, OfferPostSerializer, OfferDetailSerializer
+from offers_app.api.serializers import OfferGetSerializer, OfferPostSerializer, OfferDetailSerializer, OfferSerializer
 
 class OfferListView(generics.ListCreateAPIView):
+    queryset = Offer.objects.all()
     pagination_class = OfferPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = OfferFilter
+    search_fields = ['title', 'description']
+    ordering_fields = ['updated_at', 'min_price']
 
     def get_queryset(self):
         return (
-            Offer.objects.all()
+            super().get_queryset()
             .select_related('user')
             .prefetch_related('details')
             .annotate(
@@ -38,6 +46,19 @@ class OfferListView(generics.ListCreateAPIView):
 class OfferView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Offer.objects.filter()
     permission_classes = [IsAuthenticated, IsOwner]
+    serializer_class = OfferSerializer
+
+    def get_queryset(self):
+        return (
+            super().get_queryset()
+            .select_related('user')
+            .prefetch_related('details')
+            .annotate(
+                min_price=Min('details__price'),
+                min_delivery_time=Min('details__delivery_time_in_days'),
+            )
+        )
+
     
 class OfferDetailView(generics.RetrieveAPIView):
     queryset = OfferDetail.objects.all()

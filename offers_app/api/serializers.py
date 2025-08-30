@@ -56,3 +56,11 @@ class OfferPostSerializer(serializers.ModelSerializer):
             OfferDetail.objects.create(offer=offer, **detail)
         return offer
     
+class OfferSerializer(serializers.ModelSerializer):
+    details = OfferDetailGetSerializer(many=True)
+    min_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    min_delivery_time = serializers.IntegerField(read_only=True)
+    class Meta:
+        model = Offer
+        fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time']
+    
