@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from reviews_app.models import Review
@@ -18,15 +18,15 @@ class ReviewsView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         reviewer = self.request.user
-        business_user = serializer.validated_data.get("business_user")
+        business_user = serializer.validated_data.get('business_user')
         if Review.objects.filter(reviewer=reviewer, business_user=business_user).exists():
-            raise ValidationError("You have already written a review for this business user.")
+            raise PermissionDenied(detail='You have already written a review for this business user.')
         serializer.save(reviewer=self.request.user)
 
     def get_permissions(self):
-        if self.request.method == "GET":
+        if self.request.method == 'GET':
             permission_classes = [IsAuthenticated]
-        elif self.request.method == "POST":
+        elif self.request.method == 'POST':
             permission_classes = [IsCustomer]
         else:
             permission_classes = [AllowAny]
