@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import UserProfileCreateView, LoginView
+from .views import UserProfileCreateView, LoginView, ProfileDetailView, ProfileBusinessList, ProfileCustomerList
 
 # URL patterns define the routing for the user-related endpoints.
 urlpatterns = [
@@ -12,4 +12,7 @@ urlpatterns = [
     # Maps the URL path 'login/' to the LoginView class-based view.
     # Named 'user-login' for consistent reference throughout the project.
     path('login/', LoginView.as_view(), name='user-login'),
+    path('profile/<int:pk>/', ProfileDetailView.as_view()),
+    path('profiles/business/', ProfileBusinessList.as_view()),
+    path('profiles/customer/', ProfileCustomerList.as_view()),
 ]

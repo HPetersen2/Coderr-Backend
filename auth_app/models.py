@@ -19,6 +19,14 @@ class UserProfile(models.Model):
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     type = models.CharField(max_length=20, choices=UserType_CHOICES)
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
+    file = models.ImageField(upload_to='uploads/', blank=True, null=True)
+    location = models.CharField(max_length=50)
+    tel = models.CharField(max_length=20, blank=True)
+    description = models.TextField()
+    working_hours = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         """
@@ -26,3 +34,4 @@ class UserProfile(models.Model):
         showing the linked user's username and the user type.
         """
         return f"{self.user.username} ({self.get_type_display()})"
+    

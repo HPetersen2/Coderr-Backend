@@ -3,7 +3,6 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from ..models import UserProfile
-from profile_app.models import Profile
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
@@ -67,8 +66,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('repeated_password')
 
         user = User.objects.create_user(username=username, email=email, password=password)
-        profile = UserProfile.objects.create(user=user, **validated_data)
-        Profile.objects.create(user=user)
 
         token, _ = Token.objects.get_or_create(user=user)
 
@@ -76,8 +73,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'token': token.key,
             'username': user.username,
             'email': user.email,
-            'user_id': user.id,
-            'type': profile.type,
+            'user_id': user.id
         }
     
 class LoginSerializer(serializers.Serializer):
@@ -129,3 +125,38 @@ class LoginSerializer(serializers.Serializer):
 
         data['user'] = user
         return data
+    
+class ProfileDetailSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name')
+    type = serializers.CharField(source='user.type', read_only=True)
+    email = serializers.EmailField(source='user.email')
+
+    class Meta:
+        model = UserProfile
+        fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type', 'email', 'created_at']
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", {})
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        user = instance.user
+        for attr, value in user_data.items():
+            setattr(user, attr, value)
+        user.save()
+
+        return instance
+    
+class ProfileTypeSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name')
+    type = serializers.CharField(source='user.type', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type']
