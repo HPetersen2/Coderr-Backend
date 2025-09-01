@@ -45,7 +45,6 @@ class OfferListView(generics.ListCreateAPIView):
     
 class OfferView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Offer.objects.filter()
-    permission_classes = [IsAuthenticated, IsOwner]
     serializer_class = OfferSerializer
 
     def get_queryset(self):
@@ -58,6 +57,15 @@ class OfferView(generics.RetrieveUpdateDestroyAPIView):
                 min_delivery_time=Min('details__delivery_time_in_days'),
             )
         )
+    
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            permission_classes = [IsAuthenticated]
+        elif self.request.method == 'PATCH':
+            permission_classes = [IsAuthenticated, IsOwner]
+        elif self.request.method == 'DELETE':
+            permission_classes = [IsAuthenticated, IsOwner]
+        return [permission() for permission in permission_classes]
 
     
 class OfferDetailView(generics.RetrieveAPIView):
