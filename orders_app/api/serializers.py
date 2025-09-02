@@ -55,7 +55,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     offer_detail_id = serializers.PrimaryKeyRelatedField(
         queryset=Order.objects.model.offer_detail.field.related_model.objects.all(),
-        source='offer_detail'
+        source='offer_detail',
+        write_only=True
     )
 
     class Meta:

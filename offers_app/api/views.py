@@ -7,7 +7,7 @@ from .permissons import IsBusinessUser, IsOwner
 from .pagination import OfferPagination
 from .filters import OfferFilter
 from offers_app.models import Offer, OfferDetail
-from offers_app.api.serializers import OfferGetSerializer, OfferPostSerializer, OfferDetailSerializer, OfferSerializer
+from offers_app.api.serializers import OfferGetSerializer, OfferPostSerializer, OfferDetailSerializer, OfferSerializer, OfferDetailGetSerializer
 
 class OfferListView(generics.ListCreateAPIView):
     """
@@ -95,30 +95,30 @@ class OfferView(generics.RetrieveUpdateDestroyAPIView):
     This view handles the retrieval, update, and deletion of a specific offer.
     
     Attributes:
-        queryset: A QuerySet to retrieve offers.
-        serializer_class: The serializer used to serialize the offer data.
+        queryset (QuerySet): A QuerySet to retrieve offers.
+        serializer_class (Serializer): The serializer used to serialize the offer data.
     """
-    queryset = Offer.objects.filter()
-    serializer_class = OfferSerializer
+    queryset = Offer.objects.all()  # Base queryset for the view
 
     def get_queryset(self):
         """
         Customize the queryset for retrieving, updating, or deleting an offer.
         
-        - Selects the related 'user' field.
-        - Prefetches the related 'details' model.
-        - Annotates the offers with the minimum price and minimum delivery time.
+        - Uses select_related to optimize queries for the related 'user'.
+        - Uses prefetch_related to optimize queries for related 'details'.
+        - Annotates each offer with the minimum price and minimum delivery time
+          from its related details.
 
         Returns:
             QuerySet: The optimized and annotated queryset for the offer.
         """
         return (
             super().get_queryset()
-            .select_related('user')  # Optimizing user-related queries
-            .prefetch_related('details')  # Prefetch related offer details
+            .select_related('user')  # Optimizes foreign key lookup for the user field
+            .prefetch_related('details')  # Prefetches related offer details for efficiency
             .annotate(
-                min_price=Min('details__price'),  # Annotates with the minimum price from offer details
-                min_delivery_time=Min('details__delivery_time_in_days'),  # Annotates with the minimum delivery time
+                min_price=Min('details__price'),  # Adds min_price field to each offer
+                min_delivery_time=Min('details__delivery_time_in_days'),  # Adds min_delivery_time field to each offer
             )
         )
     
@@ -126,20 +126,41 @@ class OfferView(generics.RetrieveUpdateDestroyAPIView):
         """
         Assign appropriate permissions based on the HTTP method.
         
-        - GET: Requires the user to be authenticated.
-        - PATCH: Requires the user to be authenticated and the owner of the offer.
-        - DELETE: Requires the user to be authenticated and the owner of the offer.
+        Rules:
+        - GET: User must be authenticated.
+        - PATCH: User must be authenticated and the owner of the offer.
+        - DELETE: User must be authenticated and the owner of the offer.
 
         Returns:
-            list: A list of permission classes for the request method.
+            list: A list of instantiated permission classes for the request method.
         """
         if self.request.method == 'GET':
-            permission_classes = [IsAuthenticated]  # Authenticated users can view offers
+            permission_classes = [IsAuthenticated]  # Any authenticated user can view offers
         elif self.request.method == 'PATCH':
-            permission_classes = [IsAuthenticated, IsOwner]  # Only the owner can update an offer
+            permission_classes = [IsAuthenticated, IsOwner]  # Only the owner can update
         elif self.request.method == 'DELETE':
-            permission_classes = [IsAuthenticated, IsOwner]  # Only the owner can delete an offer
+            permission_classes = [IsAuthenticated, IsOwner]  # Only the owner can delete
+        else:
+            permission_classes = [IsAuthenticated]  # Default case
         return [permission() for permission in permission_classes]
+    
+    def get_serializer_class(self):
+        """
+        Choose the serializer class dynamically based on the HTTP method.
+        
+        - GET: Uses OfferDetailGetSerializer for detailed read-only representation.
+        - PATCH: Uses OfferSerializer for updates.
+        - DELETE: Defaults to OfferSerializer (serializer not really used here, but required).
+
+        Returns:
+            Serializer: The serializer class to be used for the current request.
+        """
+        if self.request.method == 'GET':
+            return OfferDetailGetSerializer
+        elif self.request.method == 'PATCH':
+            return OfferSerializer
+        return OfferSerializer  # Default fallback for DELETE or other methods
+    
 
 
 class OfferDetailView(generics.RetrieveAPIView):

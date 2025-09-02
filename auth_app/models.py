@@ -31,7 +31,7 @@ class UserProfile(models.Model):
         ('business', 'Business-User'),
     ]
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     """
     One-to-one relationship with the built-in User model.
     Ensures each UserProfile corresponds to exactly one User.

@@ -158,7 +158,6 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     first_name = serializers.CharField(source='user.first_name')
     last_name = serializers.CharField(source='user.last_name')
-    type = serializers.CharField(source='user.type', read_only=True)
     email = serializers.EmailField(source='user.email')
 
     class Meta:

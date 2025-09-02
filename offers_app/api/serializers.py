@@ -254,4 +254,11 @@ class OfferSerializer(serializers.ModelSerializer):
             detail.save()
 
         return instance
-    
+
+class OfferDetailGetSerializer(serializers.ModelSerializer):
+    details = OfferDetailGetSerializer(read_only=True, many=True)
+    min_price = serializers.IntegerField()
+    min_delivery_time = serializers.IntegerField()
+    class Meta:
+        model = Offer
+        fields = ['id', 'user', 'title', 'image', 'description', 'created_at', 'updated_at', 'details', 'min_price', 'min_delivery_time']
