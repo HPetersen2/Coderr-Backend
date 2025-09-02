@@ -4,9 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
-from .permissons import IsOwner
+from .permissions import IsOwner
 from ..models import UserProfile
-from .serializers import UserRegistrationSerializer, LoginSerializer, ProfileDetailSerializer, ProfileTypeSerializer
+from .serializers import UserRegistrationSerializer, LoginSerializer, ProfileDetailSerializer, ProfileTypeBusinessSerializer, ProfileTypeCustomerSerializer
+
 
 class UserProfileCreateView(generics.CreateAPIView):
     """Defines the queryset for this view as all UserProfile instances."""
@@ -24,10 +25,26 @@ class UserProfileCreateView(generics.CreateAPIView):
         """Validate the input data, raising an exception if invalid."""
         serializer.is_valid(raise_exception=True)
         """Save the new user and user profile, capturing the returned data."""
-        data = serializer.save()
+        user_or_data = serializer.save()
+
+        # serializer.save() sollte das User-Objekt zurückgeben; falls nicht, prüfen wir serializer.instance
+        user = user_or_data if hasattr(user_or_data, 'pk') else getattr(
+            serializer, 'instance', None)
+
+        if not user:
+            return Response({'detail': 'User konnte nicht erstellt werden.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Automatisch UserProfile anlegen (wenn noch nicht vorhanden)
+        try:
+            UserProfile.objects.get_or_create(user=user)
+        except Exception:
+            # Falls das Model Pflichtfelder hat, kann hier ein Fehler auftreten.
+            # Alternativ defaults hinzufügen oder Registrierung abbrechen.
+            pass
+
         """Return a successful HTTP 201 Created response with the user data."""
-        return Response(data, status=status.HTTP_201_CREATED)
-    
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
@@ -39,7 +56,10 @@ class LoginView(generics.GenericAPIView):
 
         user = serializer.validated_data['user']
 
-        profile = UserProfile.objects.get(user=user)
+        try:
+            profile = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            return Response({'detail': 'UserProfile not found for this user.'}, status=status.HTTP_400_BAD_REQUEST)
 
         token, _ = Token.objects.get_or_create(user=user)
 
@@ -49,7 +69,7 @@ class LoginView(generics.GenericAPIView):
             'email': user.email,
             'user_id': user.id
         }, status=status.HTTP_200_OK)
-    
+
 
 class ProfileDetailView(generics.RetrieveUpdateAPIView):
     queryset = UserProfile.objects.filter()
@@ -65,15 +85,17 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
 
 class ProfileBusinessList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = ProfileTypeSerializer
+    serializer_class = ProfileTypeBusinessSerializer
+    pagination_class = None
 
     def get_queryset(self):
-        return UserProfile.objects.filter(user__userprofile__type__iexact='business')
+        return UserProfile.objects.filter(type__iexact='business')
 
 
 class ProfileCustomerList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = ProfileTypeSerializer
+    serializer_class = ProfileTypeCustomerSerializer
+    pagination_class = None
 
     def get_queryset(self):
-        return UserProfile.objects.filter(user__userprofile__type__iexact='customer')
+        return UserProfile.objects.filter(type__iexact='customer')

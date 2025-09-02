@@ -9,6 +9,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True)
     repeated_password = serializers.CharField(write_only=True)
+    type = serializers.CharField(write_only=True)
 
     class Meta:
         """
@@ -64,16 +65,22 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         username = validated_data.pop('username')
         password = validated_data.pop('password')
         validated_data.pop('repeated_password')
+        user_type = validated_data.pop('type')
 
         user = User.objects.create_user(username=username, email=email, password=password)
+        UserProfile.objects.create(user=user, type=user_type)
 
         token, _ = Token.objects.get_or_create(user=user)
 
+        return user
+    
+    def to_representation(self, instance):
+        token, _ = Token.objects.get_or_create(user=instance)
         return {
             'token': token.key,
-            'username': user.username,
-            'email': user.email,
-            'user_id': user.id
+            'username': instance.username,
+            'email': instance.email,
+            'user_id': instance.id,
         }
     
 class LoginSerializer(serializers.Serializer):
@@ -151,12 +158,16 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
 
         return instance
     
-class ProfileTypeSerializer(serializers.ModelSerializer):
+class ProfileTypeBusinessSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
-    first_name = serializers.CharField(source='user.first_name')
-    last_name = serializers.CharField(source='user.last_name')
-    type = serializers.CharField(source='user.type', read_only=True)
 
     class Meta:
         model = UserProfile
         fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type']
+
+class ProfileTypeCustomerSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = ['user', 'username', 'first_name', 'last_name', 'file', 'uploaded_at', 'type']
