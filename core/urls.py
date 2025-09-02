@@ -18,6 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    # URL pattern for the Django admin site.
+    # This URL route allows access to the Django admin panel for site administrators.
     path('admin/', admin.site.urls),
+
+    # URL pattern for the API endpoints.
+    # This route includes the URL configurations from the 'core.api_urls' module.
+    # The API URLs are handled by the 'core' app and provide access to the API views.
     path('api/', include('core.api_urls'))
 ]
+

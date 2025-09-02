@@ -5,6 +5,13 @@ from rest_framework.authtoken.models import Token
 from ..models import UserProfile
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the UserProfile model used during user registration.
+
+    This serializer handles the input fields required for user registration: 
+    username, email, password, repeated password, and user type. It also includes
+    validation and custom object creation logic.
+    """
     username = serializers.CharField(write_only=True)
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True)
@@ -13,8 +20,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         """
-        Serializer for the UserProfile model used during user registration.
-        Handles input fields for username, email, password, repeated password, and user type.
+        Meta class to define the model and the fields used by the serializer.
         """
         model = UserProfile
         fields = ['username', 'email', 'password', 'repeated_password', 'type']
@@ -23,8 +29,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         """
         Perform custom validation on the incoming registration data.
 
-        - Checks that the password and repeated password match.
-        - Ensures the email and username are unique in the User model.
+        - Checks if the password and repeated password match.
+        - Ensures the email and username are unique.
 
         Args:
             data (dict): The input data to validate.
@@ -38,10 +44,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         """
         if data['password'] != data['repeated_password']:
             raise serializers.ValidationError("Passwords do not match.")
-
+        
         if User.objects.filter(email=data['email']).exists() or User.objects.filter(username=data['username']).exists():
             raise serializers.ValidationError("Email or username is already in use.")
-
+        
         return data
 
     def create(self, validated_data):
@@ -51,7 +57,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         Steps:
         - Extract and remove email, username, password, and repeated_password from validated_data.
         - Create a new Django User instance with the given username, email, and password.
-        - Create a UserProfile linked to the new User with remaining validated fields.
+        - Create a UserProfile linked to the new User with the remaining validated fields.
         - Generate or get an authentication token for the new User.
         - Return a dictionary containing the token and user info.
 
@@ -73,8 +79,17 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         token, _ = Token.objects.get_or_create(user=user)
 
         return user
-    
+
     def to_representation(self, instance):
+        """
+        Serialize the user instance and return a dictionary with the auth token and user details.
+
+        Args:
+            instance (User): The user instance to serialize.
+
+        Returns:
+            dict: A dictionary including the auth token and user details.
+        """
         token, _ = Token.objects.get_or_create(user=instance)
         return {
             'token': token.key,
@@ -82,7 +97,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'email': instance.email,
             'user_id': instance.id,
         }
-    
+
 class LoginSerializer(serializers.Serializer):
     """
     Serializer for handling user login credentials.
@@ -132,8 +147,14 @@ class LoginSerializer(serializers.Serializer):
 
         data['user'] = user
         return data
-    
+
 class ProfileDetailSerializer(serializers.ModelSerializer):
+    """
+    Serializer for retrieving and updating a user's profile details.
+
+    This serializer includes user-related information such as username, first name,
+    last name, email, type, and additional profile data like file, location, and working hours.
+    """
     username = serializers.CharField(source='user.username', read_only=True)
     first_name = serializers.CharField(source='user.first_name')
     last_name = serializers.CharField(source='user.last_name')
@@ -145,6 +166,16 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
         fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type', 'email', 'created_at']
 
     def update(self, instance, validated_data):
+        """
+        Update the user's profile and user information.
+
+        Args:
+            instance (UserProfile): The profile instance to update.
+            validated_data (dict): The validated data to update the profile.
+
+        Returns:
+            instance: The updated profile instance.
+        """
         user_data = validated_data.pop("user", {})
 
         for attr, value in validated_data.items():
@@ -157,8 +188,13 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
         user.save()
 
         return instance
-    
+
 class ProfileTypeBusinessSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the business-type user profile.
+
+    This serializer is used to handle the profile details specific to business users.
+    """
     username = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
@@ -166,6 +202,11 @@ class ProfileTypeBusinessSerializer(serializers.ModelSerializer):
         fields = ['user', 'username', 'first_name', 'last_name', 'file', 'location', 'tel', 'description', 'working_hours', 'type']
 
 class ProfileTypeCustomerSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the customer-type user profile.
+
+    This serializer is used to handle the profile details specific to customer users.
+    """
     username = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
