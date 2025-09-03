@@ -14,7 +14,7 @@ class OfferPagination(PageNumberPagination):
             This is useful for pagination control via the URL, e.g., `?page_size=20` to display 20 offers per page.
     """
     
-    page_size = 10
+    page_size = 6
     """
     Defines the default page size for pagination. This value determines how many offers are displayed per page.
     In this case, the default is set to 10 offers per page.
