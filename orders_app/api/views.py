@@ -89,7 +89,7 @@ class OrderCountView(generics.GenericAPIView):
         """
         business_user = get_object_or_404(get_user_model(), id=business_user_id, userprofile__type='business')
         
-        order_count = Order.objects.filter(business_user=business_user).count()
+        order_count = Order.objects.filter(business_user=business_user, status='in_progress').count()
         serializer = self.get_serializer({'order_count': order_count})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
