@@ -2,19 +2,19 @@ from django.urls import path
 from .views import OrderListCreateView, OrderDetailView, OrderCountView, OrderCompletedCountView
 
 urlpatterns = [
-    # URL für die Listung und Erstellung von Bestellungen
-    # Route: /orders/ (GET für eine Liste, POST für eine neue Bestellung)
+    # URL for listing and creating orders
+    # Route: /orders/ (GET for listing, POST for creating an order)
     path('orders/', OrderListCreateView.as_view()),
 
-    # URL für das Abrufen, Aktualisieren oder Löschen einer Bestellung
-    # Route: /orders/<int:pk>/ (GET, PATCH, DELETE für eine Bestellung mit der entsprechenden ID)
+    # URL for retrieving, updating, or deleting an order
+    # Route: /orders/<int:pk>/ (GET, PATCH, DELETE for a specific order by ID)
     path('orders/<int:pk>/', OrderDetailView.as_view()),
 
-    # URL für das Zählen der Bestellungen eines bestimmten Business-Users
-    # Route: /order-count/<int:business_user_id>/ (GET um die Anzahl der Bestellungen für einen Business-User zu erhalten)
+    # URL for counting orders of a specific business user
+    # Route: /order-count/<int:business_user_id>/ (GET to retrieve the count of orders for a business user)
     path('order-count/<int:business_user_id>/', OrderCountView.as_view()),
 
-    # URL für das Zählen der abgeschlossenen Bestellungen eines bestimmten Business-Users
-    # Route: /completed-order-count/<int:business_user_id>/ (GET um die Anzahl der abgeschlossenen Bestellungen zu erhalten)
+    # URL for counting completed orders of a specific business user
+    # Route: /completed-order-count/<int:business_user_id>/ (GET to retrieve the count of completed orders)
     path('completed-order-count/<int:business_user_id>/', OrderCompletedCountView.as_view()),
 ]

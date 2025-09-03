@@ -1,22 +1,17 @@
 from rest_framework import serializers
 from orders_app.models import Order
 
-
 class OrderListSerializer(serializers.ModelSerializer):
     """
     Serializer for listing orders with related offer details.
-    The offer_detail fields are exposed at the root level (no nested 'offer_detail').
+    The offer details are exposed at the root level (no nested 'offer_detail').
     """
 
     title = serializers.CharField(source='offer_detail.title', read_only=True)
-    revisions = serializers.IntegerField(
-        source='offer_detail.revisions', read_only=True)
-    delivery_time_in_days = serializers.IntegerField(
-        source='offer_detail.delivery_time_in_days', read_only=True)
-    features = serializers.ListField(
-        source='offer_detail.features', read_only=True)
-    offer_type = serializers.CharField(
-        source='offer_detail.offer_type', read_only=True)
+    revisions = serializers.IntegerField(source='offer_detail.revisions', read_only=True)
+    delivery_time_in_days = serializers.IntegerField(source='offer_detail.delivery_time_in_days', read_only=True)
+    features = serializers.ListField(source='offer_detail.features', read_only=True)
+    offer_type = serializers.CharField(source='offer_detail.offer_type', read_only=True)
 
     class Meta:
         model = Order
@@ -28,11 +23,9 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         """
-        Return a flat representation including offer_detail fields (no nested dict).
-        Uses the default field formatting from DRF for datetimes and other fields.
+        Returns a flat representation of the order including offer details.
         """
         representation = super().to_representation(instance)
-        # Ensure no nested 'offer_detail' is added here (keep flat structure)
         return representation
 
 
@@ -40,8 +33,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     """
     Serializer for creating an order.
 
-    Exposes 'offer_detail_id' for write-only input. For the response, it delegates
-    representation to OrderListSerializer to keep output consistent and flat.
+    Exposes 'offer_detail_id' for write-only input. The response uses the OrderListSerializer.
     """
 
     offer_detail_id = serializers.PrimaryKeyRelatedField(
@@ -56,17 +48,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         offer_detail = validated_data['offer_detail']
-        # Set customer as current user
         validated_data['customer_user'] = self.context['request'].user
-        # Set business user from the offer's user
         validated_data['business_user'] = offer_detail.offer.user
-        # Set price from offer detail
         validated_data['price'] = offer_detail.price
         return super().create(validated_data)
 
     def to_representation(self, instance):
         """
-        Use the list serializer for consistent, flat representation (includes title, revisions, ...).
+        Uses the list serializer for consistent, flat representation.
         """
         return OrderListSerializer(instance, context=self.context).data
 
@@ -77,3 +66,4 @@ class OrderCountSerializer(serializers.Serializer):
 
 class OrderCompletedCountSerializer(serializers.Serializer):
     completed_order_count = serializers.IntegerField()
+

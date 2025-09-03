@@ -2,26 +2,13 @@ from rest_framework.pagination import PageNumberPagination
 
 class OfferPagination(PageNumberPagination):
     """
-    Custom pagination class for paginating offers.
-
-    This class extends the `PageNumberPagination` provided by Django REST framework,
-    allowing for pagination of offers with a default page size and the ability to
-    adjust the page size through a query parameter.
-
+    Custom pagination for offers. Extends `PageNumberPagination` to allow pagination with a default page size
+    and dynamic page size control via a query parameter.
+    
     Attributes:
-        page_size (int): The default number of items per page. In this case, it's set to 10 offers per page.
-        page_size_query_param (str): The query parameter that allows the client to override the default page size.
-            This is useful for pagination control via the URL, e.g., `?page_size=20` to display 20 offers per page.
+        page_size (int): Default number of offers per page (set to 6).
+        page_size_query_param (str): Query parameter ('page_size') to allow clients to set their own page size.
     """
     
     page_size = 6
-    """
-    Defines the default page size for pagination. This value determines how many offers are displayed per page.
-    In this case, the default is set to 10 offers per page.
-    """
-
     page_size_query_param = "page_size"
-    """
-    Specifies the query parameter ('page_size') that allows the client to control the number of items per page.
-    For example, a request like `?page_size=20` will return 20 offers per page instead of the default 10.
-    """
