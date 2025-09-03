@@ -23,3 +23,7 @@ class Review(models.Model):
     description = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        short_desc = (self.description[:50] + '...') if len(self.description) > 50 else self.description
+        return f"Review by {self.reviewer} for {self.business_user} – Rating: {self.rating}/5 – {short_desc}"

@@ -36,9 +36,9 @@ class BaseInfoView(APIView):
             Response: A response containing the requested data in a dictionary format.
         """
         data = {
-            "review_count": Review.objects.count(),  # Total number of reviews
-            "average_rating": round(Review.objects.aggregate(avg=Avg("rating"))["avg"] or 0, 1),  # Average rating rounded to one decimal
-            "business_profile_count": UserProfile.objects.filter(type="business").count(),  # Total number of business profiles
-            "offer_count": Offer.objects.count(),  # Total number of offers
+            "review_count": Review.objects.count(),
+            "average_rating": round(Review.objects.aggregate(avg=Avg("rating"))["avg"] or 0, 1),
+            "business_profile_count": UserProfile.objects.filter(type="business").count(),
+            "offer_count": Offer.objects.count(),
         }
         return Response(data)
