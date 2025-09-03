@@ -6,7 +6,7 @@ from auth_app.models import UserProfile
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
-    Serializer für die Benutzerregistrierung mit Validierung und Erstellung von User und UserProfile.
+    Serializer for user registration with validation and creation of User and UserProfile.
     """
     username = serializers.CharField(write_only=True)
     email = serializers.EmailField(write_only=True)
@@ -20,9 +20,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if data['password'] != data['repeated_password']:
-            raise serializers.ValidationError("Passwörter stimmen nicht überein.")
+            raise serializers.ValidationError("Passwords do not match.")
         if User.objects.filter(email=data['email']).exists() or User.objects.filter(username=data['username']).exists():
-            raise serializers.ValidationError("Email oder Benutzername bereits vergeben.")
+            raise serializers.ValidationError("Email or username already taken.")
         return data
 
     def create(self, validated_data):
@@ -50,7 +50,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     """
-    Serializer für den Login mit Validierung der Anmeldedaten (Benutzername, Passwort).
+    Serializer for login with validation of login credentials (username, password).
     """
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
@@ -62,18 +62,18 @@ class LoginSerializer(serializers.Serializer):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            raise serializers.ValidationError("Ungültiger Benutzername oder Passwort.")
+            raise serializers.ValidationError("Invalid username or password.")
 
         user = authenticate(username=user.username, password=password)
         if not user:
-            raise serializers.ValidationError("Ungültiger Benutzername oder Passwort.")
+            raise serializers.ValidationError("Invalid username or password.")
 
         data['user'] = user
         return data
 
 class ProfileDetailSerializer(serializers.ModelSerializer):
     """
-    Serializer für das Abrufen und Bearbeiten von Benutzerprofilen.
+    Serializer for retrieving and updating user profiles.
     """
     username = serializers.CharField(source='user.username', read_only=True)
     first_name = serializers.CharField(source='user.first_name')
@@ -100,7 +100,7 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
 
 class ProfileTypeBusinessSerializer(serializers.ModelSerializer):
     """
-    Serializer für Business-Benutzerprofile.
+    Serializer for business user profiles.
     """
     username = serializers.CharField(source='user.username', read_only=True)
 
@@ -110,7 +110,7 @@ class ProfileTypeBusinessSerializer(serializers.ModelSerializer):
 
 class ProfileTypeCustomerSerializer(serializers.ModelSerializer):
     """
-    Serializer für Customer-Benutzerprofile.
+    Serializer for customer user profiles.
     """
     username = serializers.CharField(source='user.username', read_only=True)
 

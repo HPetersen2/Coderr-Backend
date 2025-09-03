@@ -3,7 +3,6 @@ from rest_framework.permissions import BasePermission
 class IsBusinessUser(BasePermission):
     """
     Custom permission to check if the user is authenticated and has a 'business' profile type.
-    
     Method:
         has_permission(request, view): Returns True if the user is authenticated and their profile type is 'business'.
     """
@@ -19,7 +18,6 @@ class IsBusinessUser(BasePermission):
 class IsOwner(BasePermission):
     """
     Custom permission to check if the authenticated user is the owner of the object.
-    
     Method:
         has_object_permission(request, view, obj): Returns True if the user is the owner of the object.
     """

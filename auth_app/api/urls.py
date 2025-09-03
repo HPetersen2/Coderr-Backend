@@ -3,11 +3,9 @@ from .views import UserProfileCreateView, LoginView, ProfileDetailView, ProfileB
 
 # URL patterns for user-related endpoints
 urlpatterns = [
-    # User registration route
     # Maps 'registration/' to UserProfileCreateView (Named 'user-register')
     path('registration/', UserProfileCreateView.as_view(), name='user-register'),
 
-    # User login route
     # Maps 'login/' to LoginView (Named 'user-login')
     path('login/', LoginView.as_view(), name='user-login'),
 
