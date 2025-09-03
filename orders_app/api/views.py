@@ -33,6 +33,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         - `POST` method uses the OrderCreateSerializer for creating orders.
         - Other methods use the OrderListSerializer for listing orders.
         """
+    def get_serializer_class(self):
         if self.request.method == 'POST':
             return OrderCreateSerializer
         return OrderListSerializer
@@ -42,7 +43,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         Saves the newly created order and prepares a response serializer for the list view.
         """
         order = serializer.save()
-        self._response_serializer = OrderListSerializer(order, context=self.get_serializer_context())
+        self._response_serializer = OrderCreateSerializer(order, context=self.get_serializer_context())
 
     def create(self, request, *args, **kwargs):
         """
@@ -53,6 +54,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         if hasattr(self, '_response_serializer'):
             response.data = self._response_serializer.data
         return response
+
     
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
