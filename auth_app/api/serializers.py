@@ -19,6 +19,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password', 'repeated_password', 'type']
 
     def validate(self, data):
+        """Ensures that the provided data is valid by checking password match and uniqueness of email and username."""
         if data['password'] != data['repeated_password']:
             raise serializers.ValidationError("Passwords do not match.")
         if User.objects.filter(email=data['email']).exists() or User.objects.filter(username=data['username']).exists():
@@ -26,6 +27,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        """Creates a new User and associated UserProfile, and generates an authentication token."""
         email = validated_data.pop('email')
         username = validated_data.pop('username')
         password = validated_data.pop('password')
@@ -40,6 +42,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
     def to_representation(self, instance):
+        """Returns a serialized representation of the user including token, username, email, and user ID."""
         token, _ = Token.objects.get_or_create(user=instance)
         return {
             'token': token.key,

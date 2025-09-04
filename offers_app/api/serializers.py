@@ -70,11 +70,13 @@ class OfferPostSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'image', 'description', 'details']
 
     def validate_details(self, value):
+        """Validates that an offer contains at least three details."""
         if len(value) < 3:
             raise serializers.ValidationError('An offer must have at least 3 details.')
         return value
 
     def create(self, validated_data):
+        """Creates a new offer along with its associated details."""
         details_data = validated_data.pop('details')
         offer = Offer.objects.create(**validated_data)
         for detail in details_data:
@@ -82,6 +84,7 @@ class OfferPostSerializer(serializers.ModelSerializer):
         return offer
 
     def update(self, instance, validated_data):
+        """Updates an existing offer and its details, ensuring a minimum of three details remain."""
         details_data = validated_data.pop('details', None)
         instance = super().update(instance, validated_data)
         if details_data:
@@ -113,6 +116,7 @@ class OfferSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'image', 'description', 'details']
 
     def update(self, instance, validated_data):
+        """Updates the offer and its related details, applying partial changes where provided."""
         details_data = validated_data.pop('details', [])
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

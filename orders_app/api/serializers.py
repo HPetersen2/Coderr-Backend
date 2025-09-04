@@ -47,6 +47,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         fields = ['offer_detail_id']
 
     def create(self, validated_data):
+        """Creates a new instance while automatically setting customer, business user, and price from the related offer detail."""
         offer_detail = validated_data['offer_detail']
         validated_data['customer_user'] = self.context['request'].user
         validated_data['business_user'] = offer_detail.offer.user
