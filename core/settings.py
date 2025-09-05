@@ -29,11 +29,10 @@ SECRET_KEY = 'django-insecure-41yyt$1i1659cb^acv3tp1=p%do_7!hq)vn_qk#dw+s#*ud@y8
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'http://127.0.0.1:3000',
+    '127.0.0.1:3000',
     '35.242.202.129',
     'api.coderr.henrik-petersen.de',
 ]
-
 
 # Application definition
 
@@ -67,8 +66,8 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
-    '35.242.202.129',
-    'api.coderr.henrik-petersen.de',
+    'http://35.242.202.129',
+    'https://api.coderr.henrik-petersen.de',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -139,6 +138,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = '/home/petermann363/projects/Coderr-Backend/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
