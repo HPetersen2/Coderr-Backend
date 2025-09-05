@@ -7,8 +7,8 @@ echo "Uploading file:  $BACKUP_NAME"
 echo "
  verbose
  open backup.henrik-petersen.de
- user backup-admin O172?3zeu
- bin
+ user backup-admin 'O172?3zeu'
+ binary
  put $BACKUP_NAME
  bye
 " | ftp -n > ftp_$$.log
