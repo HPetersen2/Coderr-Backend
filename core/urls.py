@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from core import settings
 
 urlpatterns = [
     # URL pattern for the Django admin site.
@@ -26,5 +28,5 @@ urlpatterns = [
     # This route includes the URL configurations from the 'core.api_urls' module.
     # The API URLs are handled by the 'core' app and provide access to the API views.
     path('api/', include('core.api_urls'))
-]
+] + staticfiles_urlpatterns()
 

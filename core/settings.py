@@ -28,7 +28,11 @@ SECRET_KEY = 'django-insecure-41yyt$1i1659cb^acv3tp1=p%do_7!hq)vn_qk#dw+s#*ud@y8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'http://127.0.0.1:3000',
+    '35.242.202.129',
+    'api.coderr.henrik-petersen.de',
+]
 
 
 # Application definition
@@ -62,7 +66,9 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:3000'
+    'http://127.0.0.1:3000',
+    '35.242.202.129',
+    'api.coderr.henrik-petersen.de',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
