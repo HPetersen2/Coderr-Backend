@@ -30,7 +30,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1:3000',
-    '35.242.202.129',
+    '34.40.109.15',
     'api.coderr.henrik-petersen.de',
 ]
 
@@ -66,7 +66,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
-    'http://35.242.202.129',
+    'http://34.40.109.15',
     'https://api.coderr.henrik-petersen.de',
 ]
 
