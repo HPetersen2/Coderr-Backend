@@ -1,6 +1,9 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+from django.db import models
+from django.contrib.auth.models import User
+
 class UserProfile(models.Model):
     """
     Extends Django's User model with additional profile information.
@@ -40,3 +43,7 @@ class UserProfile(models.Model):
         full_name = f"{self.first_name} {self.last_name}".strip()
         display_name = full_name if full_name else self.user.username
         return f"{display_name} ({self.get_type_display()}) – {self.location}"
+
+    def get_display_name(self):
+        return f"{self.first_name} {self.last_name}"
+

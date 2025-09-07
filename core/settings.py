@@ -29,7 +29,9 @@ SECRET_KEY = 'django-insecure-41yyt$1i1659cb^acv3tp1=p%do_7!hq)vn_qk#dw+s#*ud@y8
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1:3000',
+    '127.0.0.1',
+    'localhost',
+    '127.0.0.1:8000',
     '34.40.109.15',
     'api.coderr.henrik-petersen.de',
 ]
@@ -44,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'import_export',
     'django_filters',
     'rest_framework',
     'rest_framework.authtoken',
@@ -63,6 +66,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+IMPORT_EXPORT_CHUNK_SIZE = 1000
 
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
