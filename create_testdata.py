@@ -1,87 +1,111 @@
-import os
-import django
-import random
+import requests
 from faker import Faker
-from decimal import Decimal
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project.settings')
-django.setup()
+fake = Faker("de_DE")
 
-from django.contrib.auth.models import User
-from offers_app.models import Offer, OfferDetail
-from auth_app.models import UserProfile
-from orders_app.models import Order
-from reviews_app.models import Review
+BASE_URL = "http://127.0.0.1:8000"  # Passe bei Bedarf an
 
-fake = Faker()
+NUM_USERS = 30
+NUM_OFFERS = 15
 
-# --- Create Users and Profiles ---
-user_profiles = []
+# Basic Offer Details Template
+def get_offer_details(title):
+    return [
+        {
+            "title": f"Basic {title}",
+            "revisions": 2,
+            "delivery_time_in_days": 5,
+            "price": 150,
+            "features": ["Code Review", "Bugfixing"],
+            "offer_type": "basic"
+        },
+        {
+            "title": f"Standard {title}",
+            "revisions": 5,
+            "delivery_time_in_days": 7,
+            "price": 300,
+            "features": ["Code Review", "Bugfixing", "Unit Tests"],
+            "offer_type": "standard"
+        },
+        {
+            "title": f"Premium {title}",
+            "revisions": 10,
+            "delivery_time_in_days": 10,
+            "price": 600,
+            "features": ["Code Review", "Bugfixing", "Unit Tests", "Refactoring"],
+            "offer_type": "premium"
+        }
+    ]
 
-for _ in range(30):
-    username = fake.user_name()
-    user = User.objects.create_user(
-        username=username,
-        email=fake.email(),
-        password='password123'
-    )
-    profile_type = random.choice(['customer', 'business'])
-    profile = UserProfile.objects.create(
-        user=user,
-        type=profile_type,
-        first_name=fake.first_name(),
-        last_name=fake.last_name(),
-        location=fake.city(),
-        tel=fake.phone_number(),
-        description=fake.sentence(nb_words=12),
-        working_hours=f"{random.randint(8,10)}am-{random.randint(5,8)}pm"
-    )
-    user_profiles.append(profile)
+offer_titles = [
+    "Webentwicklung mit React",
+    "Backend mit Node.js",
+    "REST API mit Django",
+    "Fullstack App mit Laravel",
+    "Mobile App mit Flutter",
+    "Scraping-Service mit Python",
+    "Shopify Store Entwicklung",
+    "WooCommerce Custom Plugin",
+    "WordPress Website",
+    "KI-Integration in Webanwendung",
+    "DevOps Setup mit Docker",
+    "CI/CD-Pipeline mit GitHub Actions",
+    "Code Review für Java-Projekte",
+    "Individuelles PHP-Modul",
+    "Performance Optimierung"
+]
 
-# --- Create Offers and OfferDetails ---
-offer_details_list = []
+registered_users = []
 
-for profile in user_profiles:
-    if profile.type == 'business':
-        for _ in range(random.randint(1,3)):  # 1-3 offers per business
-            offer = Offer.objects.create(
-                user=profile.user,
-                title=fake.bs().title(),
-                description=fake.sentence(nb_words=15)
-            )
-            for offer_type in ['basic', 'standard', 'premium']:
-                detail = OfferDetail.objects.create(
-                    offer=offer,
-                    title=f"{offer.title} - {offer_type.title()}",
-                    revisions=random.randint(1,5),
-                    delivery_time_in_days=random.randint(1,14),
-                    price=Decimal(random.randint(50,500)),
-                    features=[fake.word() for _ in range(3)],
-                    offer_type=offer_type
-                )
-                offer_details_list.append(detail)
+# Registrierung
+for i in range(NUM_USERS):
+    user_type = "business" if i < NUM_OFFERS else "customer"
+    user_data = {
+        "username": fake.user_name(),
+        "email": fake.email(),
+        "password": "test1234",
+        "repeated_password": "test1234",
+        "type": user_type
+    }
 
-# --- Create Orders ---
-for _ in range(30):
-    customer = random.choice([p.user for p in user_profiles if p.type == 'customer'])
-    offer_detail = random.choice(offer_details_list)
-    order = Order.objects.create(
-        customer_user=customer,
-        business_user=offer_detail.offer.user,
-        offer_detail=offer_detail,
-        price=offer_detail.price,
-        status=random.choice(['in_progress', 'completed', 'cancelled'])
-    )
+    response = requests.post(f"{BASE_URL}/api/registration/", json=user_data)
+    
+    if response.status_code == 201:
+        print(f"[✔] User erstellt: {user_data['username']} ({user_type})")
+        registered_users.append({
+            **user_data,
+            "id": response.json().get("id"),  # falls zurückgegeben
+        })
+    else:
+        print(f"[✘] Fehler bei User {user_data['username']}: {response.text}")
 
-# --- Create Reviews ---
-for _ in range(30):
-    reviewer = random.choice([p.user for p in user_profiles if p.type == 'customer'])
-    business = random.choice([p.user for p in user_profiles if p.type == 'business'])
-    Review.objects.create(
-        business_user=business,
-        reviewer=reviewer,
-        rating=random.randint(1,5),
-        description=fake.sentence(nb_words=12)
-    )
+# Business-User einloggen & Angebote posten
+for i, user in enumerate(registered_users[:NUM_OFFERS]):
+    # Authentifiziere den User (angenommen, JWT oder Session nicht nötig)
+    login_response = requests.post(f"{BASE_URL}/api/token/", data={
+        "username": user["username"],
+        "password": user["password"]
+    })
 
-print("Testdaten erfolgreich erstellt!")
+    if login_response.status_code != 200:
+        print(f"[✘] Login fehlgeschlagen für {user['username']}")
+        continue
+
+    token = login_response.json()["access"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Erstelle Angebot
+    offer_title = offer_titles[i]
+    offer_data = {
+        "title": offer_title,
+        "image": None,
+        "description": fake.text(max_nb_chars=100),
+        "details": get_offer_details(offer_title)
+    }
+
+    offer_response = requests.post(f"{BASE_URL}/api/offers/", json=offer_data, headers=headers)
+
+    if offer_response.status_code == 201:
+        print(f"[✔] Angebot erstellt für {user['username']}: {offer_title}")
+    else:
+        print(f"[✘] Fehler beim Angebot: {offer_response.text}")
